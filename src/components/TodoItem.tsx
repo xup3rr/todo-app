@@ -11,7 +11,7 @@ import {
 } from "react";
 import { Todo } from "../types";
 import { PrimitiveAtom, useAtom } from "jotai";
-import { CheckCircleIcon, CheckCircleIconSolid, TrashIcon } from "./Icons";
+import { CheckCircleIcon, CheckCircleIconSolid, MinusIcon } from "./Icons";
 import clsx from "clsx";
 
 interface TodoProps {
@@ -47,6 +47,7 @@ const TodoItem: React.ForwardRefRenderFunction<TodoRef, TodoProps> = (
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Backspace" && noTodoTask) {
+      event.preventDefault();
       deleteTodo();
     }
   };
@@ -64,10 +65,17 @@ const TodoItem: React.ForwardRefRenderFunction<TodoRef, TodoProps> = (
   }));
 
   return (
-    <li className="flex gap-x-4 items-center my-4 border-b-2 border-transparent focus-within:border-slate-200 group pb-1 hover">
+    <li className="flex gap-x-2 items-center my-4 border-b-2 border-transparent focus-within:border-slate-200 group pb-1 hover">
+      <button
+        onClick={deleteTodo}
+        className="opacity-100 md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+      >
+        <MinusIcon />
+      </button>
       <button
         onClick={toggleTodo}
         className={clsx("transition-opacity", { "opacity-0": noTodoTask })}
+        disabled={noTodoTask}
       >
         {todo.done ? <CheckCircleIconSolid /> : <CheckCircleIcon />}
       </button>
@@ -81,12 +89,6 @@ const TodoItem: React.ForwardRefRenderFunction<TodoRef, TodoProps> = (
           "text-slate-400 line-through": todo.done,
         })}
       />
-      <button
-        onClick={deleteTodo}
-        className="opacity-100 md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
-      >
-        <TrashIcon />
-      </button>
     </li>
   );
 };
