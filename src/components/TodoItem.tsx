@@ -1,4 +1,10 @@
-import { ChangeEvent, ElementRef, useRef } from "react";
+import {
+  ChangeEvent,
+  ElementRef,
+  KeyboardEvent,
+  useRef,
+  useState,
+} from "react";
 import { Todo } from "../types";
 import { PrimitiveAtom, useAtom } from "jotai";
 import { CheckCircleIcon, CheckCircleIconSolid, TrashIcon } from "./Icons";
@@ -11,6 +17,7 @@ interface TodoProps {
 
 const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
   const [todo, setTodo] = useAtom(PrimitiveAtom);
+  const [shouldDelete, setShouldDelete] = useState(false);
 
   const inputRef = useRef<ElementRef<"input">>(null);
 
@@ -24,6 +31,14 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
       task: event.target.value,
       done: event.target.value.length === 0 ? false : old.done,
     }));
+    setShouldDelete(event.target.value.length === 0);
+  };
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Backspace" && shouldDelete) {
+      setShouldDelete(false);
+      deleteTodo();
+    }
   };
 
   return (
@@ -34,6 +49,7 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
       <input
         ref={inputRef}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         value={todo.task}
         disabled={todo.done}
         className={clsx("outline-none bg-transparent flex-1 transition-all", {
