@@ -2,6 +2,7 @@ import {
   ChangeEvent,
   ElementRef,
   KeyboardEvent,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -40,6 +41,10 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
       deleteTodo();
     }
   };
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [todo.done]);
 
   return (
     <li className="flex gap-x-4 items-center my-4 border-b-2 border-transparent focus-within:border-slate-300 group pb-1 hover">
