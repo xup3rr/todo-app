@@ -1,10 +1,13 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import {
   ChangeEvent,
   ElementRef,
   KeyboardEvent,
+  forwardRef,
   useEffect,
+  useImperativeHandle,
   useRef,
-  useState,
 } from "react";
 import { Todo } from "../types";
 import { PrimitiveAtom, useAtom } from "jotai";
@@ -16,11 +19,19 @@ interface TodoProps {
   deleteTodo: () => void;
 }
 
-const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
+export interface TodoRef {
+  focus: () => void;
+}
+
+const TodoItem: React.ForwardRefRenderFunction<TodoRef, TodoProps> = (
+  { todo: PrimitiveAtom, deleteTodo },
+  ref
+) => {
   const [todo, setTodo] = useAtom(PrimitiveAtom);
-  const [shouldDelete, setShouldDelete] = useState(false);
 
   const inputRef = useRef<ElementRef<"input">>(null);
+
+  const noTodoTask = todo.task.length === 0;
 
   const toggleTodo = () => {
     setTodo((prev) => ({ ...prev, done: prev.task.length > 0 && !prev.done }));
@@ -32,23 +43,32 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
       task: event.target.value,
       done: event.target.value.length === 0 ? false : old.done,
     }));
-    setShouldDelete(event.target.value.length === 0);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Backspace" && shouldDelete) {
-      setShouldDelete(false);
+    if (event.key === "Backspace" && noTodoTask) {
       deleteTodo();
     }
   };
 
-  useEffect(() => {
+  const focus = () => {
     inputRef.current?.focus();
+  };
+
+  useEffect(() => {
+    focus();
   }, [todo.done]);
 
+  useImperativeHandle(ref, () => ({
+    focus,
+  }));
+
   return (
-    <li className="flex gap-x-4 items-center my-4 border-b-2 border-transparent focus-within:border-slate-300 group pb-1 hover">
-      <button onClick={toggleTodo}>
+    <li className="flex gap-x-4 items-center my-4 border-b-2 border-transparent focus-within:border-slate-200 group pb-1 hover">
+      <button
+        onClick={toggleTodo}
+        className={clsx("transition-opacity", { "opacity-0": noTodoTask })}
+      >
         {todo.done ? <CheckCircleIconSolid /> : <CheckCircleIcon />}
       </button>
       <input
@@ -63,7 +83,7 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
       />
       <button
         onClick={deleteTodo}
-        className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
+        className="opacity-100 md:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity"
       >
         <TrashIcon />
       </button>
@@ -71,4 +91,4 @@ const TodoItem: React.FC<TodoProps> = ({ todo: PrimitiveAtom, deleteTodo }) => {
   );
 };
 
-export default TodoItem;
+export default forwardRef(TodoItem);

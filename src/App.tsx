@@ -5,7 +5,7 @@ import TodoAdd from "./components/TodoAdd";
 function App() {
   return (
     <Provider>
-      <div className="container my-4">
+      <div className="container p-4 mb-36">
         <TodoList />
         <TodoAdd />
       </div>
