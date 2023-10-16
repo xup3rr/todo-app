@@ -1,11 +1,12 @@
-import { useAtom } from "jotai";
-import { PlusIcon } from "./Icons";
-import { NewTodoAtom } from "../store/TodoStore";
 import clsx from "clsx";
+import { useAtom } from "jotai";
 import { useEffect } from "react";
+import { NewRandomTodoAtom, NewTodoAtom } from "../store/TodoStore";
+import { CloudIcon, PlusIcon, StarIcon } from "./Icons";
 
 const TodoAdd: React.FC = () => {
   const [todos, addTodo] = useAtom(NewTodoAtom);
+  const [loading, addRandomTodo] = useAtom(NewRandomTodoAtom);
 
   const disabled = todos[todos.length - 1].task.length === 0;
 
@@ -20,10 +21,10 @@ const TodoAdd: React.FC = () => {
     return () => {
       window.removeEventListener("keypress", keyPressHandler);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [todos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addNewTodo = () => {
-    if (todos[todos.length - 1].task.length > 0) {
+    if (!disabled) {
       addTodo({
         id: crypto.randomUUID(),
         task: "",
@@ -33,13 +34,22 @@ const TodoAdd: React.FC = () => {
   };
 
   return (
-    <button
-      className={clsx({ "opacity-50": disabled })}
-      onClick={addNewTodo}
-      disabled={disabled}
-    >
-      <PlusIcon />
-    </button>
+    <div className="flex gap-x-2 py-2 sticky bottom-0">
+      <button
+        className={clsx({ "opacity-50": disabled })}
+        onClick={addNewTodo}
+        disabled={disabled}
+      >
+        <PlusIcon />
+      </button>
+      <button
+        className={clsx({ "opacity-50": disabled })}
+        onClick={addRandomTodo}
+        disabled={disabled}
+      >
+        {loading ? <CloudIcon /> : <StarIcon />}
+      </button>
+    </div>
   );
 };
 
